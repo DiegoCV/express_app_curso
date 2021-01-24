@@ -1,28 +1,30 @@
-import {Request, Response} from 'express'
-import {users} from '../../data/users';
+import { Request, Response } from 'express';
+//import {users} from '../../data/users';
+import Users from '../../db/schemas/user';
 
-export const getUsers = (req:Request, res:Response):void => {
-  res.send({
-    page: 2,
-    per_page: 6,
-    total: 12,
-    total_pages: 2,
-    data: users,
-    support: {
-      url: 'https://reqres.in/#support-heading',
-      text:
-        'To keep ReqRes free, contributions towards server costs are appreciated!',
-    },
-  });
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
+  const users = Users.find();
+  res.send(users);
 };
 
-export const getUserById = (req:Request, res:Response):void => {
-  console.log('req.params', req.params);
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { userId } = req.params;
-  const index = users.findIndex((item) => item.id === parseInt(userId));
-  if (index !== -1) {
-    res.send({ data: users[index] });
+  const user = Users.findById(userId);
+  if (user) {
+    res.send(user);
   } else {
-    res.status(404).send({});
+    res.status(404).send();
   }
+};
+
+export const createUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { first_name, last_name, email, avatar, password } = req.body;
+  const newUser = await Users.create({ first_name, last_name, email, avatar, password });
+  res.send(newUser);
 };
